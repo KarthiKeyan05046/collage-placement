@@ -17,9 +17,6 @@ import {
 } from "./lib/index.js";
 import { fetchPoliciesFromRemoteUrl } from "./lib/fetchPolicies.js";
 
-// Define policy keys as a union type
-type PolicyKey = keyof Omit<StudentWithPolicyEligibility, keyof Student>;
-
 const POLICY_CONFIG = [
   { name: "Dream Company", key: "dreamCompanyPolicy", checker: checkDreamCompanyPolicy },
   { name: "Max Companies", key: "maxCompaniesPolicy", checker: checkMaxCompaniesPolicy },
@@ -60,7 +57,6 @@ export class PlacementEngine {
     if (typeof policies === "string") {
       try {
         const data = await fetchPoliciesFromRemoteUrl(policies);
-        console.log(data);
         loadedPolicies = data as Policies;
       } catch (error) {
         throw new Error(`Failed to fetch policies from URL: ${error}`);
@@ -331,19 +327,26 @@ export class PlacementEngine {
     }
 
     private getStudentStates() {
-        const allStudents = this.getAllStudents()
-        const placedStudents = allStudents.filter(student => student.student.isPlaced === true);
-        const unPlacedStudents = allStudents.filter(student => student.student.isPlaced === false);
-        const eligibleStudents = allStudents.filter(student => student.eligible === true);
-        const ineligibleStudents = allStudents.filter(student => student.eligible === false);
-
-        return {
-            allStudents,
-            placedStudents,
-            unPlacedStudents,
-            eligibleStudents,
-            ineligibleStudents
-        };
+        const allStudents = this.getAllStudents();
+    
+        const result = allStudents.reduce((acc, student) => {
+            student.student.isPlaced 
+                ? acc.placedStudents.push(student) 
+                : acc.unPlacedStudents.push(student);
+    
+            student.eligible 
+                ? acc.eligibleStudents.push(student) 
+                : acc.ineligibleStudents.push(student);
+    
+            return acc;
+        }, {
+            placedStudents: [] as StudentWithPolicyEligibilityAndReasons[],
+            unPlacedStudents: [] as StudentWithPolicyEligibilityAndReasons[],
+            eligibleStudents: [] as StudentWithPolicyEligibilityAndReasons[],
+            ineligibleStudents: [] as StudentWithPolicyEligibilityAndReasons[]
+        });
+    
+        return { allStudents, ...result };
     }
 
     private calculatePercentages(states: ReturnType<typeof this.getStudentStates>) {
