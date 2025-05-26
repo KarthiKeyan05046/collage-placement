@@ -15,6 +15,7 @@ import {
   checkOfferCategoryPolicy,
   checkDreamCompanyPolicy
 } from "./lib/index.js";
+import { fetchPoliciesFromRemoteUrl } from "./lib/fetchPolicies.js";
 
 // Define policy keys as a union type
 type PolicyKey = keyof Omit<StudentWithPolicyEligibility, keyof Student>;
@@ -49,17 +50,18 @@ export class PlacementEngine {
    * Factory method to support both object and remote URL for policies.
    */
   static async create(
-    students: Student[],
+    students: Student[] = [],
     company: Company,
-    policies: Policies | string
+    policies: Policies | string = {} as Policies
   ): Promise<PlacementEngine> {
     let loadedPolicies: Policies;
+    
 
     if (typeof policies === "string") {
       try {
-        const response = await fetch(policies);
-        const data = await response.json();
-        loadedPolicies = data.data;
+        const data = await fetchPoliciesFromRemoteUrl(policies);
+        console.log(data);
+        loadedPolicies = data as Policies;
       } catch (error) {
         throw new Error(`Failed to fetch policies from URL: ${error}`);
       }

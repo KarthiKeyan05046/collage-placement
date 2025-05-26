@@ -9,4 +9,5 @@ export default defineConfig({
   minify: false,
   globalName: 'DecisionEngine',
   outDir: 'dist',
+  target: 'es2022',
 })
