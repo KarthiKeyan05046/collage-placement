@@ -1,0 +1,20 @@
+# node modules
+node_modules
+
+# output
+output.json
+
+# logs
+logs
+*.log
+
+# env files
+
+# package lock
+package-lock.json
+
+# zip files
+*.zip
+
+# dist files
+dist
